@@ -1,6 +1,12 @@
+//
+//  mmaplib.h
+//
+//  Copyright (c) 2016 Yuji Hirose. All rights reserved.
+//  MIT License
+//
 
-#ifndef _MMAP_H_
-#define _MMAP_H_
+#ifndef _CPPMMAPLIB_MMAPLIB_H_
+#define _CPPMMAPLIB_MMAPLIB_H_
 
 #if defined(_WIN32)
 #include <windows.h>
@@ -10,6 +16,8 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #endif
+
+namespace mmap {
 
 class MemoryMappedFile
 {
@@ -144,6 +152,7 @@ inline void MemoryMappedFile::cleanup()
 #endif
 }
 
-#endif // _MMAP_H_
+} // namespace mmap
 
+#endif
 // vim: et ts=4 sw=4 cin cino={1s ff=unix
