@@ -17,7 +17,7 @@
 #include <sys/stat.h>
 #endif
 
-namespace mmap {
+namespace mmaplib {
 
 class MemoryMappedFile
 {
@@ -152,7 +152,7 @@ inline void MemoryMappedFile::cleanup()
 #endif
 }
 
-} // namespace mmap
+} // namespace mmaplib
 
 #endif
 // vim: et ts=4 sw=4 cin cino={1s ff=unix
