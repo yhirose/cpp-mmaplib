@@ -16,6 +16,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #endif
+#include <stdexcept>
 
 namespace mmaplib {
 
