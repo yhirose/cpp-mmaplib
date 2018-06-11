@@ -168,6 +168,7 @@ inline void MemoryMappedFile::cleanup()
         fd_ = -1;
     }
 #endif
+    size_ = 0;
 }
 
 } // namespace mmaplib
