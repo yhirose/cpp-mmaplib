@@ -104,7 +104,7 @@ inline mmap::mmap(const char* path)
   }
   size_ = sb.st_size;
 
-  addr_ = mmap(NULL, size_, PROT_READ, MAP_PRIVATE, fd_, 0);
+  addr_ = ::mmap(NULL, size_, PROT_READ, MAP_PRIVATE, fd_, 0);
 #endif
 
   if (addr_ == MAP_FAILED) {
