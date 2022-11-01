@@ -21,17 +21,19 @@
 namespace mmaplib {
 
 class mmap {
- public:
-  mmap(const char* path);
+public:
+  mmap();
+  mmap(const char *path);
   ~mmap();
+
+  bool open(const char *path);
+  void close();
 
   bool is_open() const;
   size_t size() const;
-  const char* data() const;
+  const char *data() const;
 
- private:
-  void cleanup();
-
+private:
 #if defined(_WIN32)
   HANDLE hFile_;
   HANDLE hMapping_;
@@ -39,51 +41,63 @@ class mmap {
   int fd_;
 #endif
   size_t size_;
-  void* addr_;
+  void *addr_;
 };
 
 #if defined(_WIN32)
 #define MAP_FAILED NULL
 #endif
 
-inline mmap::mmap(const char* path)
+inline mmap::mmap()
 #if defined(_WIN32)
-    : hFile_(NULL),
-      hMapping_(NULL)
+    : hFile_(NULL), hMapping_(NULL)
 #else
     : fd_(-1)
 #endif
       ,
-      size_(0),
-      addr_(MAP_FAILED) {
+      size_(0), addr_(MAP_FAILED) {
+}
+
+inline mmap::mmap(const char *path)
+#if defined(_WIN32)
+    : hFile_(NULL), hMapping_(NULL)
+#else
+    : fd_(-1)
+#endif
+      ,
+      size_(0), addr_(MAP_FAILED) {
+  if (!open(path)) { std::runtime_error(""); }
+}
+
+inline mmap::~mmap() { close(); }
+
+inline bool mmap::open(const char *path) {
+  close();
+
 #if defined(_WIN32)
   hFile_ = ::CreateFileA(path, GENERIC_READ, FILE_SHARE_READ, NULL,
                          OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 
-  if (hFile_ == INVALID_HANDLE_VALUE) {
-    std::runtime_error("");
-  }
+  if (hFile_ == INVALID_HANDLE_VALUE) { return false; }
 
   size_ = ::GetFileSize(hFile_, NULL);
 
   hMapping_ = ::CreateFileMapping(hFile_, NULL, PAGE_READONLY, 0, 0, NULL);
 
   if (hMapping_ == NULL) {
-    cleanup();
-    std::runtime_error("");
+    close();
+    return false;
   }
 
   addr_ = ::MapViewOfFile(hMapping_, FILE_MAP_READ, 0, 0, 0);
 #else
-  fd_ = open(path, O_RDONLY);
-  if (fd_ == -1) {
-    std::runtime_error("");
-  }
+  fd_ = ::open(path, O_RDONLY);
+  if (fd_ == -1) { return false; }
 
   struct stat sb;
   if (fstat(fd_, &sb) == -1) {
-    cleanup();
-    std::runtime_error("");
+    close();
+    return false;
   }
   size_ = sb.st_size;
 
@@ -91,20 +105,20 @@ inline mmap::mmap(const char* path)
 #endif
 
   if (addr_ == MAP_FAILED) {
-    cleanup();
-    std::runtime_error("");
+    close();
+    return false;
   }
-}
 
-inline mmap::~mmap() { cleanup(); }
+  return true;
+}
 
 inline bool mmap::is_open() const { return addr_ != MAP_FAILED; }
 
 inline size_t mmap::size() const { return size_; }
 
-inline const char* mmap::data() const { return (const char*)addr_; }
+inline const char *mmap::data() const { return (const char *)addr_; }
 
-inline void mmap::cleanup() {
+inline void mmap::close() {
 #if defined(_WIN32)
   if (addr_) {
     ::UnmapViewOfFile(addr_);
@@ -127,13 +141,14 @@ inline void mmap::cleanup() {
   }
 
   if (fd_ != -1) {
-    close(fd_);
+    ::close(fd_);
     fd_ = -1;
   }
 #endif
   size_ = 0;
 }
 
-}  // namespace mmaplib
+} // namespace mmaplib
 
 #endif
+
