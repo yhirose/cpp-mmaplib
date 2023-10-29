@@ -66,7 +66,7 @@ inline mmap::mmap(const char *path)
 #endif
       ,
       size_(0), addr_(MAP_FAILED) {
-  if (!open(path)) { std::runtime_error(""); }
+  open(path);
 }
 
 inline mmap::~mmap() { close(); }
